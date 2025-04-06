@@ -199,6 +199,12 @@ export const useTransformedTreeData = (personId: number) => {
           localLeft = partnerItem.left;
 
           if (relationship.childrenIds.length > 0) {
+            if (relationship.childrenIds.length === 1) {
+              localLeft +=
+                (defaultTreeConfig.ITEM_MARGIN_X +
+                  defaultTreeConfig.ITEM_WIDTH) /
+                2;
+            }
             const {
               mostLeft,
               mostRight,
@@ -360,6 +366,12 @@ export const useTransformedTreeData = (personId: number) => {
           let partnerMidXPosition = localLeft;
 
           if (relationship.childrenIds.length > 0) {
+            if (relationship.childrenIds.length === 1) {
+              localLeft +=
+                (defaultTreeConfig.ITEM_MARGIN_X +
+                  defaultTreeConfig.ITEM_WIDTH) /
+                2;
+            }
             const {
               mostLeft,
               mostRight,
