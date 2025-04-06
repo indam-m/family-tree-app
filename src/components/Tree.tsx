@@ -1,0 +1,72 @@
+'use client';
+
+import React from 'react';
+import { useTransformedTreeData } from '@/hooks/useTransformedTreeData';
+import { defaultTreeConfig } from '@/constants/person';
+import TreeCard from './TreeCard';
+import { TreeItem } from '@/types/tree';
+import TreeLine from './TreeLine';
+
+const Tree: React.FC = (): React.JSX.Element => {
+  // hooks
+  const transformedTreeData = useTransformedTreeData(4);
+
+  // Calculate the bounding box of all TreeCards and TreeLines
+  const minX =
+    Math.min(
+      ...transformedTreeData.treeItems.map((item) => item.midXPosition),
+    ) -
+    defaultTreeConfig.ITEM_WIDTH / 2;
+  const maxX =
+    Math.max(
+      ...transformedTreeData.treeItems.map((item) => item.midXPosition),
+    ) +
+    defaultTreeConfig.ITEM_WIDTH / 2;
+  const minY =
+    Math.min(
+      ...transformedTreeData.treeItems.map((item) => item.midYPosition),
+    ) -
+    defaultTreeConfig.ITEM_HEIGHT / 2;
+  const maxY =
+    Math.max(
+      ...transformedTreeData.treeItems.map((item) => item.midYPosition),
+    ) +
+    defaultTreeConfig.ITEM_HEIGHT / 2;
+
+  const width = maxX + minX; // Add padding
+  const height = maxY + minY; // Add padding
+
+  return (
+    <div
+      className="absolute border-amber-300 border-2"
+      style={{ width: `${width}px`, height: `${height}px` }}
+    >
+      {transformedTreeData.treeItems.map((item: TreeItem, index: number) => (
+        <TreeCard
+          key={index}
+          midXPosition={item.midXPosition}
+          midYPosition={item.midYPosition}
+          person={item.person}
+        />
+      ))}
+      <svg className="group absolute w-full h-full left-0 top-0 pointer-events-none">
+        {transformedTreeData.treeLines.map((line, index) => (
+          <TreeLine
+            key={index}
+            left={line.left}
+            right={line.right}
+            top={line.top}
+            bottom={line.bottom}
+            width={line.width}
+            isDotted={line.isDotted}
+            color={line.color}
+            hoverMessage={line.hoverMessage}
+            onClick={line.onClick}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+export default Tree;

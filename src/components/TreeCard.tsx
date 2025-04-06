@@ -1,0 +1,40 @@
+import React from 'react';
+import Image from 'next/image';
+import { defaultTreeConfig } from '@/constants/person';
+import { TreeItem } from '@/types/tree';
+
+const TreeCard: React.FC<TreeItem> = ({
+  midXPosition = 50,
+  midYPosition = 100,
+  person,
+}): React.JSX.Element => {
+  return (
+    <div
+      className={`group absolute justify-center grid shadow-amber-50 shadow-md bg-white rounded-2xl w-50 h-80`}
+      style={{
+        left: `${midXPosition - defaultTreeConfig.ITEM_WIDTH / 2}px`,
+        top: `${midYPosition - defaultTreeConfig.ITEM_HEIGHT / 2}px`,
+      }}
+    >
+      <div className="items-center min-h-50 max-h-50 rounded-t-2xl overflow-hidden">
+        <Image
+          src="/example_indam.png"
+          alt="indam example"
+          width={200}
+          height={200}
+        />
+      </div>
+      <div className="p-2 text-black items-center">
+        <h3 className="text-lg md:text-xl font-bold">
+          {person.firstName} {person.lastName}
+        </h3>
+        <p>{person.nickName}</p>
+        <p className="text-yellow-800">
+          {person.birthPlace}, {person.birthDate}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default TreeCard;
