@@ -147,6 +147,7 @@ export const useTransformedTreeData = (personId: number) => {
     const localMidY = currentMidY;
 
     if (traceParents) {
+      // have both parents data
       if (person.parentAId !== 0 && person.parentBId !== 0) {
         const parentAItem = generateTreeItem(
           person.parentAId,
@@ -245,6 +246,19 @@ export const useTransformedTreeData = (personId: number) => {
             bottom: localMidY,
           },
         ]);
+      } else if (person.parentAId !== 0 || person.parentBId !== 0) {
+        // have only parent data
+        const parentId = person.parentAId || person.parentBId;
+        return generateTreeItem(
+          parentId,
+          depth + 1,
+          localMidX,
+          localMidY,
+          position,
+          traceRelationship,
+          false,
+          0,
+        );
       }
     }
 
