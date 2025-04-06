@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { defaultTreeConfig } from '@/constants/person';
+import { defaultTreeConfig, gender } from '@/constants/person';
 import { TreeItem } from '@/types/tree';
 
 const TreeCard: React.FC<TreeItem> = ({
@@ -10,7 +10,7 @@ const TreeCard: React.FC<TreeItem> = ({
 }): React.JSX.Element => {
   return (
     <div
-      className={`group absolute justify-center grid shadow-amber-50 shadow-md bg-white rounded-2xl w-50 h-80`}
+      className={`group absolute justify-center grid shadow-amber-50 shadow-md ${person.gender === gender.GENDER_MALE ? 'bg-blue-400' : (person.gender === gender.GENDER_FEMALE && 'bg-pink-400') || 'bg-white'} rounded-2xl w-50 h-80`}
       style={{
         left: `${midXPosition - defaultTreeConfig.ITEM_WIDTH / 2}px`,
         top: `${midYPosition - defaultTreeConfig.ITEM_HEIGHT / 2}px`,

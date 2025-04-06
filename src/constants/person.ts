@@ -12,7 +12,7 @@ export const defaultTreeConfig = {
   ITEM_MARGIN_X: 50,
   ITEM_MARGIN_Y: 100,
   ITEM_LINE_WIDTH: 2,
-  SUCCESSOR_DEPTH: 2,
+  SUCCESSOR_DEPTH: 3,
   PREDECESSOR_DEPTH: 2,
 };
 
