@@ -1,9 +1,9 @@
 // This file contains constants related to person data
 
 export const gender = {
-  GENDER_MALE: 'male',
-  GENDER_FEMALE: 'female',
-  GENDER_OTHER: 'other',
+  MALE: 'male',
+  FEMALE: 'female',
+  OTHER: 'other',
 };
 
 export const defaultTreeConfig = {

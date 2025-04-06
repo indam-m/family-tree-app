@@ -14,7 +14,7 @@ const peopleData: Person[] = [
     firstName: 'Indam Muhammad',
     lastName: 'Hery',
     nickName: 'Indam',
-    gender: gender.GENDER_MALE,
+    gender: gender.MALE,
     birthDate: '1994-05-31',
     birthPlace: 'Bandung',
     isDeceased: false,
@@ -27,7 +27,7 @@ const peopleData: Person[] = [
     firstName: 'Ilham',
     lastName: 'Muhammad',
     nickName: 'Ilham',
-    gender: gender.GENDER_MALE,
+    gender: gender.MALE,
     birthDate: '1991-10-20',
     birthPlace: 'Bandung',
     isDeceased: false,
@@ -40,7 +40,7 @@ const peopleData: Person[] = [
     firstName: 'Hery',
     lastName: 'Purwanto',
     nickName: 'Hery',
-    gender: gender.GENDER_MALE,
+    gender: gender.MALE,
     birthDate: '1958-08-04',
     birthPlace: 'Mojokerto',
     isDeceased: false,
@@ -53,7 +53,7 @@ const peopleData: Person[] = [
     firstName: 'Dewi',
     lastName: 'Rinakanti',
     nickName: 'Dewi',
-    gender: gender.GENDER_FEMALE,
+    gender: gender.FEMALE,
     birthDate: '1966-01-03',
     birthPlace: 'Bandung',
     isDeceased: false,
@@ -66,7 +66,7 @@ const peopleData: Person[] = [
     firstName: 'Hertry',
     lastName: 'Purwanto',
     nickName: 'Hery',
-    gender: gender.GENDER_MALE,
+    gender: gender.MALE,
     birthDate: '1958-08-04',
     birthPlace: 'Mojokerto',
     isDeceased: false,
@@ -79,7 +79,7 @@ const peopleData: Person[] = [
     firstName: 'Detrwi',
     lastName: 'Rinakanti',
     nickName: 'Dewi',
-    gender: gender.GENDER_FEMALE,
+    gender: gender.FEMALE,
     birthDate: '1966-01-03',
     birthPlace: 'Bandung',
     isDeceased: false,
@@ -166,8 +166,7 @@ export const useTransformedTreeData = (personId: number) => {
         relationships = fetchRelationships(personId);
         relationships.forEach((relationship, index) => {
           if (
-            (relationships.length === 1 &&
-              person.gender !== gender.GENDER_MALE) ||
+            (relationships.length === 1 && person.gender !== gender.MALE) ||
             (relationships.length > 1 && index < relationships.length / 2)
           ) {
             leftRelationships.push(relationship);
