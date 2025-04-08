@@ -254,15 +254,6 @@ export const useTransformedTreeData = (personId: number) => {
             }
           }
         });
-
-        if (
-          position === treeItemPosition.LEFT &&
-          leftRelationships.length === 0
-        ) {
-          localMidX -=
-            (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
-            2;
-        }
       }
 
       // If having personal children
@@ -447,7 +438,6 @@ export const useTransformedTreeData = (personId: number) => {
               (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
                 2;
           }
-          console.log('chec2k', person.firstName, localMidX);
 
           const partnerItem = generateTreeItem(
             partnerId,
@@ -529,9 +519,7 @@ export const useTransformedTreeData = (personId: number) => {
         });
       }
     }
-    console.log('chec33k', person.firstName, localMidX);
     if (proceed) {
-      console.log('chec3k', person.firstName, treeItem.midXPosition, localMidX);
       setTreeItems((prevItems) => [...prevItems, treeItem]);
     }
     return {
