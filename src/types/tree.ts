@@ -23,6 +23,15 @@ export interface TreeLine {
   isDotted: boolean;
   color: string;
   hoverMessage: string;
+  personOneId: number;
+  personTwoId: number;
+  relationshipId: number;
+  parentChildId: number;
+  isHalfChildToParent: boolean;
+  isHalfParentToChild: boolean;
+  isLeftToRightSibling: boolean;
+  isMidChildToSingleParent: boolean;
+  isRelationship: boolean;
   onClick: () => void;
 }
 
@@ -59,6 +68,7 @@ export interface ParentChild {
 }
 
 export interface Relationship {
+  id: number;
   personOne?: Person;
   personTwo?: Person;
   personOneId: number;
