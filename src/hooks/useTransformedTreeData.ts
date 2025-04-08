@@ -1,131 +1,28 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useQuery } from '@apollo/client';
 import {
   gender,
   defaultTreeConfig,
   DEFAULT_TREE_LINE,
   treeItemPosition,
 } from '@/constants/person';
-import { Person, Relationship, TreeItem, TreeLine } from '@/types/tree';
-
-const peopleData: Person[] = [
-  {
-    id: 1,
-    firstName: 'Indam Muhammad',
-    lastName: 'Hery',
-    nickName: 'Indam',
-    gender: gender.MALE,
-    birthDate: '1994-05-31',
-    birthPlace: 'Bandung',
-    isDeceased: false,
-    childrenIDs: [],
-    parentAId: 3,
-    parentBId: 4,
-  },
-  {
-    id: 2,
-    firstName: 'Ilham',
-    lastName: 'Muhammad',
-    nickName: 'Ilham',
-    gender: gender.MALE,
-    birthDate: '1991-10-20',
-    birthPlace: 'Bandung',
-    isDeceased: false,
-    childrenIDs: [],
-    parentAId: 3,
-    parentBId: 4,
-  },
-  {
-    id: 3,
-    firstName: 'Hery',
-    lastName: 'Purwanto',
-    nickName: 'Hery',
-    gender: gender.MALE,
-    birthDate: '1958-08-04',
-    birthPlace: 'Mojokerto',
-    isDeceased: false,
-    childrenIDs: [],
-    parentAId: 0,
-    parentBId: 0,
-  },
-  {
-    id: 4,
-    firstName: 'Dewi',
-    lastName: 'Rinakanti',
-    nickName: 'Dewi',
-    gender: gender.FEMALE,
-    birthDate: '1966-01-03',
-    birthPlace: 'Bandung',
-    isDeceased: false,
-    childrenIDs: [5],
-    parentAId: 0,
-    parentBId: 0,
-  },
-  {
-    id: 5,
-    firstName: 'Hertry',
-    lastName: 'Purwanto',
-    nickName: 'Hery',
-    gender: gender.MALE,
-    birthDate: '1958-08-04',
-    birthPlace: 'Mojokerto',
-    isDeceased: false,
-    childrenIDs: [6],
-    parentAId: 0,
-    parentBId: 0,
-  },
-  {
-    id: 6,
-    firstName: 'Detrwi',
-    lastName: 'Rinakanti',
-    nickName: 'Dewi',
-    gender: gender.FEMALE,
-    birthDate: '1966-01-03',
-    birthPlace: 'Bandung',
-    isDeceased: false,
-    childrenIDs: [],
-    parentAId: 0,
-    parentBId: 0,
-  },
-];
-
-const relationshipData: Relationship[] = [
-  {
-    personOne: peopleData[2],
-    personTwo: peopleData[3],
-    personOneId: 3,
-    personTwoId: 4,
-    isMarried: true,
-    isDivorced: false,
-    isSeparated: false,
-    isCohabiting: false,
-    isEngaged: false,
-    isInRelationship: true,
-    childrenIds: [1, 2],
-  },
-];
+import {
+  Person,
+  ParentChild,
+  Relationship,
+  TreeItem,
+  TreeLine,
+} from '@/types/tree';
+import { GET_EVERYTHING } from '@/lib/graphql/queries';
 
 export const useTransformedTreeData = (personId: number) => {
   const [treeItems, setTreeItems] = useState<TreeItem[]>([]);
   const [treeLines, setTreeLines] = useState<TreeLine[]>([]);
+  const [peopleData, setPeopleData] = useState<Person[]>([]);
+  const [personDict, setPersonDict] = useState<{ [id: number]: Person }>({});
 
-  const personDict: { [id: number]: Person } = peopleData.reduce(
-    (acc, person) => {
-      acc[person.id] = person;
-      return acc;
-    },
-    {} as { [id: number]: Person },
-  );
-
-  const fetchRelationships = (personId: number, partnerIdToExclude: number) => {
-    return relationshipData.filter(
-      (relationship) =>
-        (relationship.personOneId === personId &&
-          relationship.personTwoId !== partnerIdToExclude) ||
-        (relationship.personTwoId === personId &&
-          relationship.personOneId !== partnerIdToExclude),
-    );
-  };
+  const { data, loading, error } = useQuery(GET_EVERYTHING);
 
   const generateTreeItem = (
     personId: number,
@@ -138,6 +35,14 @@ export const useTransformedTreeData = (personId: number) => {
     partnerIdToExclude: number,
   ) => {
     const person = personDict[personId];
+    let parentOneId = 0,
+      parentTwoId = 0;
+    const parentChildRelation =
+      person?.parentChildRelations && person?.parentChildRelations[0];
+    if (parentChildRelation) {
+      parentOneId = parentChildRelation?.parentOneId || 0;
+      parentTwoId = parentChildRelation?.parentTwoId || 0;
+    }
     let treeItem: TreeItem = {
       person: person,
       midXPosition: currentMidX,
@@ -148,28 +53,23 @@ export const useTransformedTreeData = (personId: number) => {
 
     if (traceParents) {
       // have both parents data
-      if (person.parentAId !== 0 && person.parentBId !== 0) {
-        const parentAItem = generateTreeItem(
-          person.parentAId,
+      if (parentOneId !== 0 && parentTwoId !== 0) {
+        const parentOneItem = generateTreeItem(
+          parentOneId,
           depth + 1,
           localMidX,
           localMidY,
           treeItemPosition.LEFT,
           true,
           false,
-          person.parentBId,
+          parentTwoId,
         );
-        localMidX = parentAItem.midX;
+        localMidX = parentOneItem.midX;
 
         // Generating children
-        const relationshipItem = relationshipData.find(
-          (relationship) =>
-            (relationship.personOneId === person.parentAId &&
-              relationship.personTwoId === person.parentBId) ||
-            (relationship.personOneId === person.parentBId &&
-              relationship.personTwoId === person.parentAId),
-        );
-        if (relationshipItem?.childrenIds.length === 1) {
+        const relationshipItem = (person.parentChildRelations || [])[0]
+          ?.relationship;
+        if (relationshipItem?.parentChildren?.length === 1) {
           localMidX +=
             (defaultTreeConfig.ITEM_MARGIN_X + defaultTreeConfig.ITEM_WIDTH) /
             2;
@@ -179,7 +79,7 @@ export const useTransformedTreeData = (personId: number) => {
           mostRight,
           localMidX: _localMidX,
         } = processChildren(
-          relationshipItem?.childrenIds || [],
+          relationshipItem?.parentChildren || [],
           depth,
           localMidX,
           localMidY +
@@ -188,7 +88,7 @@ export const useTransformedTreeData = (personId: number) => {
         );
 
         localMidX = _localMidX;
-        if (relationshipItem?.childrenIds.length === 1) {
+        if (relationshipItem?.parentChildren?.length === 1) {
           localMidX +=
             (defaultTreeConfig.ITEM_MARGIN_X + defaultTreeConfig.ITEM_WIDTH) /
             2;
@@ -200,8 +100,8 @@ export const useTransformedTreeData = (personId: number) => {
         const midPosition = (mostLeft + mostRight) / 2;
 
         // Generating Parent B
-        const parentBItem = generateTreeItem(
-          person.parentBId,
+        const parentTwoItem = generateTreeItem(
+          parentTwoId,
           depth + 1,
           midPosition +
             (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
@@ -210,9 +110,9 @@ export const useTransformedTreeData = (personId: number) => {
           treeItemPosition.RIGHT,
           true,
           false,
-          person.parentAId,
+          parentOneId,
         );
-        localMidX = parentBItem.midX;
+        localMidX = parentTwoItem.midX;
 
         setTreeLines((prevLines) => [
           ...prevLines,
@@ -237,18 +137,18 @@ export const useTransformedTreeData = (personId: number) => {
           {
             ...DEFAULT_TREE_LINE,
             left:
-              parentAItem.treeItem.midXPosition +
+              parentOneItem.treeItem.midXPosition +
               defaultTreeConfig.ITEM_WIDTH / 2,
             right:
-              parentBItem.treeItem.midXPosition -
+              parentTwoItem.treeItem.midXPosition -
               defaultTreeConfig.ITEM_WIDTH / 2,
             top: localMidY,
             bottom: localMidY,
           },
         ]);
-      } else if (person.parentAId !== 0 || person.parentBId !== 0) {
+      } else if (parentOneId !== 0 || parentTwoId !== 0) {
         // have only parent data
-        const parentId = person.parentAId || person.parentBId;
+        const parentId = parentOneId || parentTwoId;
         return generateTreeItem(
           parentId,
           depth + 1,
@@ -263,7 +163,7 @@ export const useTransformedTreeData = (personId: number) => {
     }
 
     const proceed =
-      !traceParents || (person.parentAId === 0 && person.parentBId === 0);
+      !traceParents || (person.parentOneId === 0 && person.parentTwoId === 0);
     if (depth > 1 && proceed) {
       const childMidTop = getChildMidTop(localMidY);
 
@@ -282,7 +182,13 @@ export const useTransformedTreeData = (personId: number) => {
       let selfMidXPosition = currentMidX;
 
       if (traceRelationship) {
-        relationships = fetchRelationships(personId, partnerIdToExclude);
+        relationships = (person?.relationshipsAsPersonOne || [])
+          .concat(person?.relationshipsAsPersonTwo || [])
+          .filter(
+            (relationship) =>
+              relationship.personOneId !== partnerIdToExclude &&
+              relationship.personTwoId !== partnerIdToExclude,
+          );
         relationships.forEach((relationship, index) => {
           if (
             position === treeItemPosition.LEFT ||
@@ -319,9 +225,10 @@ export const useTransformedTreeData = (personId: number) => {
             relationship,
           });
           localMidX = partnerItem.midX;
+          const parentChildren = relationship.parentChildren || [];
 
-          if (relationship.childrenIds.length > 0) {
-            if (relationship.childrenIds.length === 1) {
+          if (parentChildren.length > 0) {
+            if (relationship.parentChildren?.length === 1) {
               localMidX +=
                 (defaultTreeConfig.ITEM_MARGIN_X +
                   defaultTreeConfig.ITEM_WIDTH) /
@@ -331,12 +238,7 @@ export const useTransformedTreeData = (personId: number) => {
               mostLeft,
               mostRight,
               localMidX: _localMidX,
-            } = processChildren(
-              relationship.childrenIds,
-              depth,
-              localMidX,
-              childMidTop,
-            );
+            } = processChildren(parentChildren, depth, localMidX, childMidTop);
             localMidX = _localMidX;
             const topLine =
               childMidTop -
@@ -379,7 +281,8 @@ export const useTransformedTreeData = (personId: number) => {
       }
 
       // If having personal children
-      if (person.childrenIDs.length > 0) {
+      const personalChildren = person?.parentChildOfChildren || [];
+      if (personalChildren.length > 0) {
         if (position === treeItemPosition.RIGHT) {
           localMidX +=
             defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X;
@@ -389,7 +292,12 @@ export const useTransformedTreeData = (personId: number) => {
           mostLeft,
           mostRight,
           localMidX: _localMidX,
-        } = processChildren(person.childrenIDs, depth, localMidX, childMidTop);
+        } = processChildren(
+          person.parentChildOfChildren || [],
+          depth,
+          localMidX,
+          childMidTop,
+        );
         localMidX = _localMidX;
 
         let midXPosition = (mostLeft + mostRight) / 2;
@@ -485,8 +393,10 @@ export const useTransformedTreeData = (personId: number) => {
               : relationship.personOneId;
           let partnerMidXPosition = localMidX;
 
-          if (relationship.childrenIds.length > 0) {
-            if (relationship.childrenIds.length === 1) {
+          const parentChildren = relationship.parentChildren || [];
+
+          if (parentChildren.length > 0) {
+            if (parentChildren.length === 1) {
               localMidX +=
                 (defaultTreeConfig.ITEM_MARGIN_X +
                   defaultTreeConfig.ITEM_WIDTH) /
@@ -496,12 +406,7 @@ export const useTransformedTreeData = (personId: number) => {
               mostLeft,
               mostRight,
               localMidX: _localMidX,
-            } = processChildren(
-              relationship.childrenIds,
-              depth,
-              localMidX,
-              childMidTop,
-            );
+            } = processChildren(parentChildren, depth, localMidX, childMidTop);
             localMidX = _localMidX;
             const topLine =
               childMidTop -
@@ -531,7 +436,7 @@ export const useTransformedTreeData = (personId: number) => {
             if (
               leftRelationships.length === 0 &&
               rightRelationships.length === 1 &&
-              person.childrenIDs.length === 0
+              personalChildren.length === 0
             ) {
               selfMidXPosition =
                 midPosition -
@@ -620,7 +525,7 @@ export const useTransformedTreeData = (personId: number) => {
   };
 
   const processChildren = (
-    childrenIds: number[],
+    parentChildrens: ParentChild[],
     depth: number,
     currentMidX: number,
     localMidY: number,
@@ -628,7 +533,8 @@ export const useTransformedTreeData = (personId: number) => {
     let localMidX = currentMidX;
     let mostLeft = 0,
       mostRight = 0;
-    childrenIds.forEach((childId, index) => {
+    parentChildrens.forEach((parentChild, index) => {
+      const childId = parentChild.childId;
       const childItem = generateTreeItem(
         childId,
         depth - 1,
@@ -642,7 +548,7 @@ export const useTransformedTreeData = (personId: number) => {
       if (index === 0) {
         mostLeft = childItem.treeItem.midXPosition;
       }
-      if (index === childrenIds.length - 1) {
+      if (index === parentChildrens.length - 1) {
         mostRight = childItem.treeItem.midXPosition;
       }
       setTreeLines((prevLines) => [
@@ -671,20 +577,43 @@ export const useTransformedTreeData = (personId: number) => {
     );
   };
 
+  // useEffect
   useEffect(() => {
-    setTreeItems([]);
-    setTreeLines([]);
-    generateTreeItem(
-      personId,
-      defaultTreeConfig.SUCCESSOR_DEPTH,
-      defaultTreeConfig.ITEM_MARGIN_X + defaultTreeConfig.ITEM_WIDTH,
-      defaultTreeConfig.ITEM_MARGIN_Y + defaultTreeConfig.ITEM_HEIGHT,
-      treeItemPosition.CENTER,
-      true,
-      true,
-      0,
-    );
-  }, [personId]);
+    if (!loading && !error) {
+      setPeopleData(data?.people || []);
+    }
+  }, [personId, loading, error]);
 
-  return { treeItems, treeLines };
+  useEffect(() => {
+    if (peopleData.length > 0) {
+      setPersonDict(
+        peopleData.reduce(
+          (acc: { [id: number]: Person }, person: Person) => {
+            acc[person.id] = person;
+            return acc;
+          },
+          {} as { [id: number]: Person },
+        ),
+      );
+    }
+  }, [peopleData]);
+
+  useEffect(() => {
+    if (personDict[personId]) {
+      setTreeItems([]);
+      setTreeLines([]);
+      generateTreeItem(
+        personId,
+        defaultTreeConfig.SUCCESSOR_DEPTH,
+        defaultTreeConfig.ITEM_MARGIN_X + defaultTreeConfig.ITEM_WIDTH,
+        defaultTreeConfig.ITEM_MARGIN_Y + defaultTreeConfig.ITEM_HEIGHT,
+        treeItemPosition.CENTER,
+        true,
+        true,
+        0,
+      );
+    }
+  }, [personDict]);
+
+  return { treeItems, treeLines, loading, error };
 };

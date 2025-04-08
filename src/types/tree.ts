@@ -37,13 +37,25 @@ export interface Person {
   isDeceased: boolean;
   deceasedDate?: string;
   deceasedPlace?: string;
-  children?: Person[];
-  childrenIDs: number[];
-  parentA?: Person;
-  parentB?: Person;
-  parentAId: number;
-  parentBId: number;
   note?: string;
+  parentChildRelations?: ParentChild[];
+  relationshipsAsPersonOne?: Relationship[];
+  relationshipsAsPersonTwo?: Relationship[];
+  parentChildOfChildren?: ParentChild[];
+}
+
+export interface ParentChild {
+  parentOne?: Person;
+  parentTwo?: Person;
+  child?: Person;
+  parentOneId: number;
+  parentTwoId: number;
+  childId: number;
+  relationshipId?: number;
+  relationship?: Relationship;
+  isAdopted: boolean;
+  isFoster: boolean;
+  isBiological: boolean;
 }
 
 export interface Relationship {
@@ -60,6 +72,5 @@ export interface Relationship {
   note?: string;
   marriageDate?: string;
   marriagePlace?: string;
-  children?: Person[];
-  childrenIds: number[];
+  parentChildren?: ParentChild[];
 }

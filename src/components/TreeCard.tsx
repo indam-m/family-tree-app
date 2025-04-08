@@ -2,15 +2,25 @@ import React from 'react';
 import Image from 'next/image';
 import { defaultTreeConfig, gender } from '@/constants/person';
 import { TreeItem } from '@/types/tree';
+import { format } from 'date-fns'; // Import the format function
 
 const TreeCard: React.FC<TreeItem> = ({
   midXPosition = 50,
   midYPosition = 100,
   person,
 }): React.JSX.Element => {
+  // Format the birthDate
+  const formattedBirthDate = person.birthDate
+    ? format(new Date(person.birthDate), 'dd MMMM yyyy') // Example: "January 1, 2000"
+    : '-';
+
   return (
     <div
-      className={`group absolute justify-center grid shadow-amber-50 shadow-md ${person.gender === gender.MALE ? 'bg-blue-400' : (person.gender === gender.FEMALE && 'bg-pink-400') || 'bg-white'} rounded-2xl w-50 h-80`}
+      className={`group absolute justify-center grid shadow-amber-50 shadow-md ${
+        person.gender === gender.MALE
+          ? 'bg-blue-400'
+          : (person.gender === gender.FEMALE && 'bg-pink-400') || 'bg-white'
+      } rounded-2xl w-50 h-80`}
       style={{
         left: `${midXPosition - defaultTreeConfig.ITEM_WIDTH / 2}px`,
         top: `${midYPosition - defaultTreeConfig.ITEM_HEIGHT / 2}px`,
@@ -30,7 +40,7 @@ const TreeCard: React.FC<TreeItem> = ({
         </h3>
         <p>{person.nickName}</p>
         <p className="text-yellow-800">
-          {person.birthPlace}, {person.birthDate}
+          {person.birthPlace}, {formattedBirthDate}
         </p>
       </div>
     </div>
