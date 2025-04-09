@@ -6,6 +6,12 @@ export const gender = {
   OTHER: 'other',
 };
 
+export const defaultImage = {
+  MALE: '/default/male.jpeg',
+  FEMALE: 'default/female.webp',
+  OTHER: '/default/male.jpeg',
+};
+
 export const defaultTreeConfig = {
   ITEM_WIDTH: 200,
   ITEM_HEIGHT: 320,

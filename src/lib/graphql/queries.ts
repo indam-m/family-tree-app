@@ -200,3 +200,14 @@ export const GET_EVERYTHING = gql`
     }
   }
 `;
+
+export const SEARCH_PEOPLE = gql`
+  query SearchPeople($search: String!, $excludeIds: [Int]) {
+    searchPeople(search: $search, excludeIds: $excludeIds) {
+      id
+      firstName
+      lastName
+      nickName
+    }
+  }
+`;

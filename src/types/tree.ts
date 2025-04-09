@@ -35,8 +35,7 @@ export interface TreeLine {
   onClick: () => void;
 }
 
-export interface Person {
-  id: number;
+export interface Person extends BasicData {
   firstName: string;
   lastName: string;
   nickName: string;
@@ -44,16 +43,17 @@ export interface Person {
   birthDate: string;
   birthPlace: string;
   isDeceased: boolean;
-  deceasedDate?: string;
-  deceasedPlace?: string;
-  note?: string;
+  deathDate?: string;
+  deathPlace?: string;
+  notes?: string;
   parentChildRelations?: ParentChild[];
   relationshipsAsPersonOne?: Relationship[];
   relationshipsAsPersonTwo?: Relationship[];
   parentChildOfChildren?: ParentChild[];
+  imageUrl?: string;
 }
 
-export interface ParentChild {
+export interface ParentChild extends BasicData {
   parentOne?: Person;
   parentTwo?: Person;
   child?: Person;
@@ -67,8 +67,7 @@ export interface ParentChild {
   isBiological: boolean;
 }
 
-export interface Relationship {
-  id: number;
+export interface Relationship extends BasicData {
   personOne?: Person;
   personTwo?: Person;
   personOneId: number;
@@ -79,8 +78,18 @@ export interface Relationship {
   isCohabiting: boolean;
   isEngaged: boolean;
   isInRelationship: boolean;
-  note?: string;
+  notes?: string;
   marriageDate?: string;
   marriagePlace?: string;
   parentChildren?: ParentChild[];
+}
+
+export interface BasicData {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  createdBy: string;
+  updatedBy: string;
+  deletedBy?: string;
+  id: number;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { defaultTreeConfig, gender } from '@/constants/person';
+import { defaultTreeConfig, defaultImage, gender } from '@/constants/person';
 import { TreeItem } from '@/types/tree';
 import { format } from 'date-fns'; // Import the format function
 
@@ -13,6 +13,21 @@ const TreeCard: React.FC<TreeItem> = ({
   const formattedBirthDate = person.birthDate
     ? format(new Date(person.birthDate), 'dd MMMM yyyy') // Example: "January 1, 2000"
     : '-';
+
+  let imageUrl = person.imageUrl;
+  if (!imageUrl) {
+    switch (person.gender) {
+      case gender.MALE:
+        imageUrl = defaultImage.MALE;
+        break;
+      case gender.FEMALE:
+        imageUrl = defaultImage.FEMALE;
+        break;
+      default:
+        imageUrl = defaultImage.OTHER;
+        break;
+    }
+  }
 
   return (
     <div
@@ -28,18 +43,18 @@ const TreeCard: React.FC<TreeItem> = ({
     >
       <div className="items-center min-h-50 max-h-50 rounded-t-2xl overflow-hidden">
         <Image
-          src="/example_indam.png"
-          alt="indam example"
+          src={imageUrl}
+          alt={`${person.firstName} ${person.lastName} photo`}
           width={200}
           height={200}
         />
       </div>
       <div className="p-2 text-black items-center">
-        <h3 className="text-lg md:text-xl font-bold">
+        <h3 className="text-md md:text-md font-bold">
           {person.firstName} {person.lastName}
         </h3>
-        <p>{person.nickName}</p>
-        <p className="text-yellow-800">
+        <p className="text-sm">{person.nickName}</p>
+        <p className="text-sm text-yellow-800">
           {person.birthPlace}, {formattedBirthDate}
         </p>
       </div>
