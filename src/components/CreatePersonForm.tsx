@@ -268,6 +268,42 @@ export default function CreatePersonForm({ id }: { id: number }) {
         setParentOneId(parentOneId || null);
         setParentTwoId(parentTwoId || null);
       }
+      const relationships = (person.relationshipsAsPersonOne || []).concat(
+        person.relationshipsAsPersonTwo || [],
+      );
+      if (relationships.length) {
+        setPartnerForms(
+          relationships.map((relationshipItem) => ({
+            id:
+              relationshipItem.personOneId === id
+                ? relationshipItem.personTwoId
+                : relationshipItem.personOneId,
+            search:
+              relationshipItem.personOneId === id
+                ? `${relationshipItem.personTwo?.firstName}${relationshipItem.personTwo?.lastName ? ' ' + relationshipItem.personTwo?.lastName : ''}`
+                : `${relationshipItem.personOne?.firstName}${relationshipItem.personOne?.lastName ? ' ' + relationshipItem.personOne?.lastName : ''}`,
+            isMarried: relationshipItem.isMarried,
+            isDivorced: relationshipItem.isDivorced,
+            isSeparated: relationshipItem.isSeparated,
+            isEngaged: relationshipItem.isEngaged,
+            isCohabitated: relationshipItem.isCohabitated,
+            isTogether: relationshipItem.isTogether,
+            marriageDate: relationshipItem.marriageDate || '',
+            marriagePlace: relationshipItem.marriagePlace || '',
+            divorcedDate: relationshipItem.divorcedDate || '',
+            divorcedPlace: relationshipItem.divorcedPlace || '',
+            engagementDate: relationshipItem.engagementDate || '',
+            engagementPlace: relationshipItem.engagementPlace || '',
+            cohabitationDate: relationshipItem.cohabitationDate || '',
+            cohabitationPlace: relationshipItem.cohabitationPlace || '',
+            togetherDate: relationshipItem.togetherDate || '',
+            togetherPlace: relationshipItem.togetherPlace || '',
+            notes: relationshipItem.notes || '',
+          })),
+        );
+      } else {
+        setPartnerForms([{ ...defaultPartnerForm }]);
+      }
     }
   }, [id, data, getLoading, getError]);
 
@@ -444,6 +480,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
           onSelect={(person) => setParentOneId(person.id)}
           placeholder="Search parent one..."
           excludeIds={(id ? [id] : []).concat(parentTwoId ? [parentTwoId] : [])}
+          selectedPersonId={parentOneId || 0} // Pass selected person ID to avoid conflicts
         />
 
         <p className="text-sm text-gray-500">Selected ID: {parentOneId}</p>
@@ -455,6 +492,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
           onSelect={(person) => setParentTwoId(person.id)}
           placeholder="Search parent two..."
           excludeIds={(id ? [id] : []).concat(parentOneId ? [parentOneId] : [])}
+          selectedPersonId={parentTwoId || 0} // Pass selected person ID to avoid conflicts
         />
 
         <p className="text-sm text-gray-500">Selected ID: {parentTwoId}</p>
@@ -483,8 +521,11 @@ export default function CreatePersonForm({ id }: { id: number }) {
               excludeIds={(id ? [id] : []).concat(
                 partnerForm.id ? [partnerForm.id] : [],
               )}
+              selectedPersonId={partnerForm.id || 0}
             />
-            <p className="text-sm text-gray-500">Selected ID: {parentTwoId}</p>
+            <p className="text-sm text-gray-500">
+              Selected ID: {partnerForm.id}
+            </p>
           </div>
           {/* Marriage section */}
           <div>

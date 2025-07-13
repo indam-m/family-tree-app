@@ -1,22 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchPeople } from '@/hooks/usePerson';
+import { useState, useEffect } from 'react';
+import { useSearchPeople, useGetPersonById } from '@/hooks/usePerson';
 import { Person } from '@/types/tree';
 
 type Props = {
   onSelect: (person: Person) => void;
   placeholder?: string;
   excludeIds?: number[];
+  selectedPersonId: number;
 };
 
 export default function PersonAutocomplete({
   onSelect,
   placeholder,
   excludeIds,
+  selectedPersonId,
 }: Props) {
   const [inputValue, setInputValue] = useState('');
   const [searchPeople, { data }] = useSearchPeople();
+  const { data: personData } = useGetPersonById({
+    variables: { id: selectedPersonId },
+    skip: !selectedPersonId, // Skip the query if selectedPersonId is not provided
+  });
   const [showOptions, setShowOptions] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,6 +42,13 @@ export default function PersonAutocomplete({
     setInputValue(`${person.firstName} ${person.lastName || ''}`);
     setShowOptions(false);
   };
+
+  useEffect(() => {
+    if (personData?.person) {
+      const { firstName, lastName } = personData.person;
+      setInputValue(`${firstName} ${lastName || ''}`);
+    }
+  }, [personData]);
 
   return (
     <div className="relative w-full">
