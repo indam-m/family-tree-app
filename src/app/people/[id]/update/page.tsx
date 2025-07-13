@@ -1,13 +1,16 @@
-import { useRouter } from 'next/router';
+'use client';
+
+import { useParams } from 'next/navigation';
 import CreatePersonForm from '@/components/CreatePersonForm';
 
 const PersonForm = () => {
-  const router = useRouter();
-  const { id } = router.query;
+  const { id } = useParams(); // Get the `id` from the route parameters
   const idNum = Number(id);
+
   if (isNaN(idNum)) {
     return <div>Invalid ID</div>;
   }
+
   return (
     <div>
       <CreatePersonForm id={idNum} />

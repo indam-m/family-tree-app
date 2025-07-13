@@ -9,7 +9,7 @@ import TreeLine from './TreeLine';
 
 const Tree: React.FC = (): React.JSX.Element => {
   // hooks
-  const transformedTreeData = useTransformedTreeData(4);
+  const transformedTreeData = useTransformedTreeData(1);
 
   // Calculate the bounding box of all TreeCards and TreeLines
   const minX =
@@ -60,6 +60,15 @@ const Tree: React.FC = (): React.JSX.Element => {
             width={line.width}
             isDotted={line.isDotted}
             color={line.color}
+            personOneId={line.personOneId}
+            personTwoId={line.personTwoId}
+            relationshipId={line.relationshipId}
+            parentChildId={line.parentChildId}
+            isHalfChildToParent={line.isHalfChildToParent}
+            isHalfParentToChild={line.isHalfParentToChild}
+            isLeftToRightSibling={line.isLeftToRightSibling}
+            isMidChildToSingleParent={line.isMidChildToSingleParent}
+            isRelationship={line.isRelationship}
             hoverMessage={line.hoverMessage}
             onClick={line.onClick}
           />

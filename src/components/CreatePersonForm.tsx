@@ -7,8 +7,10 @@ import {
   useCreatePerson,
   useUpdatePerson,
 } from '@/hooks/usePerson';
+import { useUpsertRelationships } from '@/hooks/useRelationship';
 import { Person } from '@/types/tree';
 import PersonAutocomplete from '@/components/PersonAutoComplete';
+import { PartnerForm } from '@/types/form';
 
 const defaultForm = {
   firstName: '',
@@ -26,6 +28,28 @@ const defaultForm = {
   updatedBy: 'admin',
 };
 
+const defaultPartnerForm: PartnerForm = {
+  id: null,
+  search: '',
+  isMarried: false,
+  isDivorced: false,
+  isSeparated: false,
+  isEngaged: false,
+  isCohabitated: false,
+  isTogether: false,
+  marriageDate: '',
+  marriagePlace: '',
+  divorcedDate: '',
+  divorcedPlace: '',
+  engagementDate: '',
+  engagementPlace: '',
+  cohabitationDate: '',
+  cohabitationPlace: '',
+  togetherDate: '',
+  togetherPlace: '',
+  notes: '',
+};
+
 export default function CreatePersonForm({ id }: { id: number }) {
   const {
     data,
@@ -38,14 +62,19 @@ export default function CreatePersonForm({ id }: { id: number }) {
 
   const [createPerson, createState] = useCreatePerson();
   const [updatePerson, updateState] = useUpdatePerson();
+  const [upsertRelationships, upsertRelationshipsState] =
+    useUpsertRelationships();
   const [parentOneId, setParentOneId] = useState<number | null>(null);
   const [parentTwoId, setParentTwoId] = useState<number | null>(null);
+  const [partnerForms, setPartnerForms] = useState<PartnerForm[]>([
+    { ...defaultPartnerForm },
+  ]);
 
   const [form, setForm] = useState({
     ...defaultForm,
   });
 
-  const handleChange = (
+  const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
@@ -72,31 +101,142 @@ export default function CreatePersonForm({ id }: { id: number }) {
         deathPlace: form.deathPlace || null,
         imageUrl: form.imageUrl || null,
         notes: form.notes || null,
+        parentOneId: parentOneId || null,
+        parentTwoId: parentTwoId || null,
       };
+      let thePerson = {} as Person;
+      console.log('input', input);
       if (!id) {
-        await createPerson({
+        const createResult = await createPerson({
           variables: input,
         });
+        thePerson = createResult.data?.createPerson as Person;
       } else {
-        await updatePerson({
+        const updateResult = await updatePerson({
           variables: {
+            ...input,
             id,
-            input,
           },
         });
+        thePerson = updateResult.data?.updatePerson as Person;
       }
 
-      alert('🎉 Person created!');
-      setForm({
-        ...defaultForm,
-      });
+      const newRelationshipInputs = partnerForms
+        .filter((partner) => partner.id !== null)
+        .map((partner) => ({
+          personOneId: id || thePerson.id,
+          personTwoId: partner.id,
+          isMarried: partner.isMarried,
+          isDivorced: partner.isDivorced,
+          isSeparated: partner.isSeparated,
+          isEngaged: partner.isEngaged,
+          isCohabitated: partner.isCohabitated,
+          isTogether: partner.isTogether,
+          marriageDate: partner.marriageDate || null,
+          marriagePlace: partner.marriagePlace || null,
+          divorcedDate: partner.divorcedDate || null,
+          divorcedPlace: partner.divorcedPlace || null,
+          engagementDate: partner.engagementDate || null,
+          engagementPlace: partner.engagementPlace || null,
+          cohabitationDate: partner.cohabitationDate || null,
+          cohabitationPlace: partner.cohabitationPlace || null,
+          togetherDate: partner.togetherDate || null,
+          togetherPlace: partner.togetherPlace || null,
+        }));
+
+      if (newRelationshipInputs.length > 0) {
+        await upsertRelationships({
+          variables: {
+            relationships: newRelationshipInputs,
+          },
+        });
+        console.log('newRelationshipInputs', newRelationshipInputs);
+      }
+
+      alert(`🎉 Person ${id ? 'updated' : 'created'}!`);
+      if (!id) {
+        // Reset form if creating a new person
+        setForm({ ...defaultForm });
+        setParentOneId(null);
+        setParentTwoId(null);
+        setPartnerForms([{ ...defaultPartnerForm }]);
+      }
     } catch (err) {
       console.error('Mutation error:', err);
     }
   };
 
-  const loading = getLoading || createState.loading || updateState.loading;
-  const error = getError || createState.error || updateState.error;
+  const handleAddPartner = () => {
+    setPartnerForms((prev) => [...prev, { ...defaultPartnerForm }]);
+  };
+
+  const handleRemovePartner = (index: number) => {
+    setPartnerForms((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePartnerChange = (
+    index: number,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { value, name } = e.target;
+    const { checked } = e.target as HTMLInputElement;
+    setPartnerForms((prev) =>
+      prev.map((partner, i) =>
+        i === index
+          ? {
+              ...partner,
+              [name]: [
+                'isMarried',
+                'isDivorced',
+                'isEngaged',
+                'isCohabitated',
+                'isTogether',
+              ].includes(name)
+                ? checked
+                : value,
+              ...(name === 'isMarried' &&
+                !checked && {
+                  marriageDate: '',
+                  marriagePlace: '',
+                }),
+              ...(name === 'isDivorced' &&
+                !checked && {
+                  divorcedDate: '',
+                  divorcedPlace: '',
+                }),
+              ...(name === 'isEngaged' &&
+                !checked && {
+                  engagementDate: '',
+                  engagementPlace: '',
+                }),
+              ...(name === 'isCohabitated' &&
+                !checked && {
+                  cohabitationDate: '',
+                  cohabitationPlace: '',
+                }),
+              ...(name === 'isTogether' &&
+                !checked && {
+                  togetherDate: '',
+                  togetherPlace: '',
+                }),
+            }
+          : partner,
+      ),
+    );
+  };
+
+  const loading =
+    getLoading ||
+    createState.loading ||
+    updateState.loading ||
+    upsertRelationshipsState.loading;
+  const error =
+    getError ||
+    createState.error ||
+    updateState.error ||
+    upsertRelationshipsState.error;
 
   useEffect(() => {
     if (id && data && !getLoading && !getError) {
@@ -122,6 +262,12 @@ export default function CreatePersonForm({ id }: { id: number }) {
         createdBy: person.createdBy,
         updatedBy: person.updatedBy,
       });
+      if (person.parentChildRelations?.length) {
+        const parentOneId = person.parentChildRelations[0].parentOneId;
+        const parentTwoId = person.parentChildRelations[0].parentTwoId;
+        setParentOneId(parentOneId || null);
+        setParentTwoId(parentTwoId || null);
+      }
     }
   }, [id, data, getLoading, getError]);
 
@@ -143,7 +289,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
             type="text"
             name="firstName"
             value={form.firstName}
-            onChange={handleChange}
+            onChange={handleInputChange}
             className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
             required
           />
@@ -157,7 +303,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
             type="text"
             name="lastName"
             value={form.lastName}
-            onChange={handleChange}
+            onChange={handleInputChange}
             className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
           />
         </div>
@@ -170,7 +316,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
         <input
           name="nickName"
           value={form.nickName}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
         />
       </div>
@@ -182,7 +328,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
         <select
           name="gender"
           value={form.gender}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
           required
         >
@@ -201,7 +347,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
           type="date"
           name="birthDate"
           value={form.birthDate}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
         />
       </div>
@@ -213,7 +359,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
         <input
           name="birthPlace"
           value={form.birthPlace}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
         />
       </div>
@@ -274,7 +420,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
         <input
           name="imageUrl"
           value={form.imageUrl}
-          onChange={handleChange}
+          onChange={handleInputChange}
           className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
         />
       </div>
@@ -286,7 +432,7 @@ export default function CreatePersonForm({ id }: { id: number }) {
         <textarea
           name="notes"
           value={form.notes}
-          onChange={handleChange}
+          onChange={handleInputChange}
           rows={3}
           className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
         />
@@ -313,6 +459,274 @@ export default function CreatePersonForm({ id }: { id: number }) {
 
         <p className="text-sm text-gray-500">Selected ID: {parentTwoId}</p>
       </div>
+
+      {partnerForms.map((partnerForm, index) => (
+        <div key={index} className="border p-4 rounded-lg shadow-md">
+          <div className="space-y-4">
+            <label className="block text-sm font-medium">
+              Partner {index + 1}
+            </label>
+            <PersonAutocomplete
+              onSelect={(person) => {
+                setPartnerForms((prevData) =>
+                  prevData.map((partner, i) =>
+                    i === index
+                      ? {
+                          ...partner,
+                          id: person.id,
+                        }
+                      : partner,
+                  ),
+                );
+              }}
+              placeholder="Search partner..."
+              excludeIds={(id ? [id] : []).concat(
+                partnerForm.id ? [partnerForm.id] : [],
+              )}
+            />
+            <p className="text-sm text-gray-500">Selected ID: {parentTwoId}</p>
+          </div>
+          {/* Marriage section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Is Married
+            </label>
+            <input
+              type="checkbox"
+              name="isMarried"
+              checked={partnerForm.isMarried}
+              onChange={(e) => handlePartnerChange(index, e)}
+              className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+          {partnerForm.isMarried && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Marriage Date
+                </label>
+                <input
+                  type="date"
+                  name="marriageDate"
+                  value={partnerForm.marriageDate}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Marriage Place
+                </label>
+                <input
+                  name="marriagePlace"
+                  value={partnerForm.marriagePlace}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+            </>
+          )}
+          {/* Divorce section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Is Divorced
+            </label>
+            <input
+              type="checkbox"
+              name="isDivorced"
+              checked={partnerForm.isDivorced}
+              onChange={(e) => handlePartnerChange(index, e)}
+              className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+          {partnerForm.isDivorced && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Divorced Date
+                </label>
+                <input
+                  type="date"
+                  name="divorcedDate"
+                  value={partnerForm.divorcedDate}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Divorced Place
+                </label>
+                <input
+                  name="divorcedPlace"
+                  value={partnerForm.divorcedPlace}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+            </>
+          )}
+          {/* Engagement section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Is Engaged
+            </label>
+            <input
+              type="checkbox"
+              name="isEngaged"
+              checked={partnerForm.isEngaged}
+              onChange={(e) => handlePartnerChange(index, e)}
+              className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+          {partnerForm.isEngaged && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Engagement Date
+                </label>
+                <input
+                  type="date"
+                  name="engagementDate"
+                  value={partnerForm.engagementDate}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Engagement Place
+                </label>
+                <input
+                  name="engagementPlace"
+                  value={partnerForm.engagementPlace}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+            </>
+          )}
+          {/* Cohabitation section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Is Cohabitated
+            </label>
+            <input
+              type="checkbox"
+              name="isCohabitated"
+              checked={partnerForm.isCohabitated}
+              onChange={(e) => handlePartnerChange(index, e)}
+              className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+          {partnerForm.isCohabitated && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Cohabitation Date
+                </label>
+                <input
+                  type="date"
+                  name="cohabitationDate"
+                  value={partnerForm.cohabitationDate}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Cohabitation Place
+                </label>
+                <input
+                  name="cohabitationPlace"
+                  value={partnerForm.cohabitationPlace}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+            </>
+          )}
+          {/* Together section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Is Together
+            </label>
+            <input
+              type="checkbox"
+              name="isTogether"
+              checked={partnerForm.isTogether}
+              onChange={(e) => handlePartnerChange(index, e)}
+              className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+          </div>
+          {partnerForm.isTogether && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Together Date
+                </label>
+                <input
+                  type="date"
+                  name="togetherDate"
+                  value={partnerForm.togetherDate}
+                  onChange={(e) =>
+                    setPartnerForms((prev) =>
+                      prev.map((partner, i) =>
+                        i === index
+                          ? { ...partner, togetherDate: e.target.value }
+                          : partner,
+                      ),
+                    )
+                  }
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Together Place
+                </label>
+                <input
+                  name="togetherPlace"
+                  value={partnerForm.togetherPlace}
+                  onChange={(e) => handlePartnerChange(index, e)}
+                  className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+                />
+              </div>
+            </>
+          )}
+          {/* Notes section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Partner {index + 1} Notes
+            </label>
+            <textarea
+              name="notes"
+              value={partnerForm.notes}
+              onChange={(e) => handlePartnerChange(index, e)}
+              rows={3}
+              className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
+            />
+          </div>
+          {/* Remove partner button */}
+          <button
+            type="button"
+            onClick={() => handleRemovePartner(index)}
+            className="text-red-500 hover:underline"
+          ></button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={handleAddPartner}
+        className={
+          partnerForms[partnerForms.length - 1].id !== null
+            ? `text-blue-500 hover:underline hover:cursor-pointer`
+            : `text-gray-500 cursor-not-allowed`
+        }
+        disabled={partnerForms[partnerForms.length - 1].id === null}
+      >
+        Add Partner
+      </button>
 
       <button
         type="submit"

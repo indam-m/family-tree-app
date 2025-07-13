@@ -14,7 +14,7 @@ import {
   TreeItem,
   TreeLine,
 } from '@/types/tree';
-import { GET_EVERYTHING } from '@/lib/graphql/queries';
+import { GET_EVERYTHING } from '@/lib/graphql/person/queries';
 
 export const useTransformedTreeData = (personId: number) => {
   const [treeItems, setTreeItems] = useState<TreeItem[]>([]);

@@ -75,12 +75,20 @@ export interface Relationship extends BasicData {
   isMarried: boolean;
   isDivorced: boolean;
   isSeparated: boolean;
-  isCohabiting: boolean;
   isEngaged: boolean;
-  isInRelationship: boolean;
-  notes?: string;
   marriageDate?: string;
   marriagePlace?: string;
+  isCohabitated: boolean;
+  isTogether: boolean;
+  divorcedDate?: string;
+  divorcedPlace?: string;
+  engagementDate?: string;
+  engagementPlace?: string;
+  cohabitationDate?: string;
+  cohabitationPlace?: string;
+  togetherDate?: string;
+  togetherPlace?: string;
+  notes?: string;
   parentChildren?: ParentChild[];
 }
 
