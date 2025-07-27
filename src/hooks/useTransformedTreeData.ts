@@ -22,6 +22,8 @@ export const useTransformedTreeData = (personId: number) => {
   const [peopleData, setPeopleData] = useState<Person[]>([]);
   const [personDict, setPersonDict] = useState<{ [id: number]: Person }>({});
 
+  let maxMidX = 0;
+
   const { data, loading, error } = useQuery(GET_EVERYTHING);
 
   const generateTreeItem = (
@@ -65,6 +67,7 @@ export const useTransformedTreeData = (personId: number) => {
           parentTwoId,
         );
         localMidX = parentOneItem.midX;
+        maxMidX = Math.max(maxMidX, localMidX);
       } else if (parentOneId !== 0 || parentTwoId !== 0) {
         // have only parent data
         const parentId = parentOneId || parentTwoId;
@@ -143,11 +146,13 @@ export const useTransformedTreeData = (personId: number) => {
             false,
             0,
           );
+          maxMidX = Math.max(maxMidX, localMidX);
           leftPartnerTreeItems.push({
             treeItem: partnerItem.treeItem,
             relationship,
           });
           localMidX = partnerItem.midX;
+          maxMidX = Math.max(maxMidX, localMidX);
           const parentChildren = relationship.parentChildren || [];
 
           if (parentChildren.length > 0) {
@@ -157,12 +162,14 @@ export const useTransformedTreeData = (personId: number) => {
                   defaultTreeConfig.ITEM_WIDTH) /
                 2;
             }
+            maxMidX = Math.max(maxMidX, localMidX);
             const {
               mostLeft,
               mostRight,
               localMidX: _localMidX,
             } = processChildren(parentChildren, depth, localMidX, childMidTop);
             localMidX = _localMidX;
+            maxMidX = Math.max(maxMidX, localMidX);
             const topLine =
               childMidTop -
               (defaultTreeConfig.ITEM_HEIGHT / 2 +
@@ -260,8 +267,12 @@ export const useTransformedTreeData = (personId: number) => {
       const personalChildren = person?.parentChildOfChildren || [];
       if (personalChildren.length > 0) {
         if (position === treeItemPosition.RIGHT) {
-          localMidX +=
-            defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X;
+          localMidX = Math.max(
+            localMidX +
+              defaultTreeConfig.ITEM_WIDTH +
+              defaultTreeConfig.ITEM_MARGIN_X,
+            maxMidX,
+          );
         }
 
         const {
@@ -275,6 +286,7 @@ export const useTransformedTreeData = (personId: number) => {
           childMidTop,
         );
         localMidX = _localMidX;
+        maxMidX = Math.max(maxMidX, localMidX);
 
         let midXPosition = (mostLeft + mostRight) / 2;
         if (position === treeItemPosition.LEFT) {
@@ -297,6 +309,7 @@ export const useTransformedTreeData = (personId: number) => {
             defaultTreeConfig.ITEM_WIDTH +
             defaultTreeConfig.ITEM_MARGIN_X;
           localMidX = selfMidXPosition;
+          maxMidX = Math.max(maxMidX, localMidX);
         }
 
         const topLine =
@@ -367,6 +380,8 @@ export const useTransformedTreeData = (personId: number) => {
         ...treeItem,
         midXPosition: selfMidXPosition,
       };
+      localMidX = selfMidXPosition;
+      maxMidX = Math.max(maxMidX, localMidX);
 
       // Right relationships generating
       if (traceRelationship) {
@@ -392,6 +407,7 @@ export const useTransformedTreeData = (personId: number) => {
               localMidX: _localMidX,
             } = processChildren(parentChildren, depth, localMidX, childMidTop);
             localMidX = _localMidX;
+            maxMidX = Math.max(maxMidX, localMidX);
             const topLine =
               childMidTop -
               (defaultTreeConfig.ITEM_HEIGHT / 2 +
@@ -449,6 +465,7 @@ export const useTransformedTreeData = (personId: number) => {
             false,
             partnerIdToExclude !== 0 ? personId : 0,
           );
+          maxMidX = Math.max(maxMidX, localMidX);
           rightPartnerTreeItems.push({
             treeItem: partnerItem.treeItem,
             relationship,
@@ -522,6 +539,9 @@ export const useTransformedTreeData = (personId: number) => {
     if (proceed) {
       setTreeItems((prevItems) => [...prevItems, treeItem]);
     }
+    console.log(
+      `Generated tree item for person ${personId} at depth ${depth} with position ${position} and localMidX ${localMidX}`,
+    );
     return {
       treeItem,
       midX:
@@ -553,6 +573,7 @@ export const useTransformedTreeData = (personId: number) => {
         false,
         0,
       );
+      maxMidX = Math.max(maxMidX, localMidX);
       if (index === 0) {
         mostLeft = childItem.treeItem.midXPosition;
       }
@@ -575,6 +596,7 @@ export const useTransformedTreeData = (personId: number) => {
         },
       ]);
       localMidX = childItem.midX;
+      maxMidX = Math.max(maxMidX, localMidX);
     });
     return { mostLeft, mostRight, localMidX, localMidY };
   };
@@ -623,7 +645,7 @@ export const useTransformedTreeData = (personId: number) => {
         0,
       );
     }
-  }, [personDict]);
+  }, [personDict, personId]);
 
   return { treeItems, treeLines, loading, error };
 };

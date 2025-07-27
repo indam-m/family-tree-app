@@ -44,6 +44,12 @@ export default function PersonAutocomplete({
   };
 
   useEffect(() => {
+    if (!selectedPersonId) {
+      setInputValue('');
+    }
+  }, [selectedPersonId]);
+
+  useEffect(() => {
     if (personData?.person) {
       const { firstName, lastName } = personData.person;
       setInputValue(`${firstName} ${lastName || ''}`);
