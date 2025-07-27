@@ -9,7 +9,7 @@ import {
 import { GET_PERSON_BY_ID, SEARCH_PEOPLE } from '@/lib/graphql/person/queries';
 
 export function useGetPersonById(options: {
-  variables: { id: number };
+  variables: { id?: number };
   skip?: boolean;
 }) {
   return useQuery(GET_PERSON_BY_ID, options); // Pass options to useQuery

@@ -4,6 +4,10 @@ export interface TreeItem {
   person: Person;
 }
 
+export interface WholeTree {
+  id: number;
+}
+
 export interface TreeData {
   treeItems: TreeItem[];
   treeLines: TreeLine[];

@@ -50,7 +50,7 @@ const defaultPartnerForm: PartnerForm = {
   notes: '',
 };
 
-export default function CreatePersonForm({ id }: { id: number }) {
+export default function CreatePersonForm({ id }: { id?: number }) {
   const {
     data,
     loading: getLoading,

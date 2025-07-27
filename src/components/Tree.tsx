@@ -4,12 +4,12 @@ import React from 'react';
 import { useTransformedTreeData } from '@/hooks/useTransformedTreeData';
 import { defaultTreeConfig } from '@/constants/person';
 import TreeCard from './TreeCard';
-import { TreeItem } from '@/types/tree';
+import { TreeItem, WholeTree } from '@/types/tree';
 import TreeLine from './TreeLine';
 
-const Tree: React.FC = (): React.JSX.Element => {
+const Tree: React.FC<WholeTree> = ({ id = 1 }): React.JSX.Element => {
   // hooks
-  const transformedTreeData = useTransformedTreeData(1);
+  const transformedTreeData = useTransformedTreeData(id);
 
   // Calculate the bounding box of all TreeCards and TreeLines
   const minX =

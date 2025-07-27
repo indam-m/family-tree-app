@@ -4,7 +4,7 @@ import Tree from '@/components/Tree';
 const TreePage = () => {
   return (
     <main>
-      <Tree />
+      <Tree id={1} />
     </main>
   );
 };
