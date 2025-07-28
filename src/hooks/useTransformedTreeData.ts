@@ -453,6 +453,9 @@ export const useTransformedTreeData = (personId: number) => {
               midPosition +
               (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
                 2;
+          } else {
+            partnerMidXPosition +=
+              defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X;
           }
 
           const partnerItem = generateTreeItem(

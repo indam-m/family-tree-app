@@ -7,7 +7,7 @@ import TreeCard from './TreeCard';
 import { TreeItem, WholeTree } from '@/types/tree';
 import TreeLine from './TreeLine';
 
-const Tree: React.FC<WholeTree> = ({ id = 1 }): React.JSX.Element => {
+const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
   // hooks
   const transformedTreeData = useTransformedTreeData(id);
 
@@ -38,7 +38,7 @@ const Tree: React.FC<WholeTree> = ({ id = 1 }): React.JSX.Element => {
 
   return (
     <div
-      className="absolute border-amber-300 border-2"
+      className="absolute"
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       {transformedTreeData.treeItems.map((item: TreeItem, index: number) => (
