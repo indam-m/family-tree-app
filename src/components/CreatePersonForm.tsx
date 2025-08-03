@@ -50,7 +50,15 @@ const defaultPartnerForm: PartnerForm = {
   notes: '',
 };
 
-export default function CreatePersonForm({ id }: { id?: number }) {
+export default function CreatePersonForm({
+  id,
+  onSubmit,
+  onClose,
+}: {
+  id?: number;
+  onSubmit?: (person: Person) => void;
+  onClose?: () => void;
+}) {
   const {
     data,
     loading: getLoading,
@@ -154,6 +162,9 @@ export default function CreatePersonForm({ id }: { id?: number }) {
       }
 
       alert(`🎉 Person ${id ? 'updated' : 'created'}!`);
+      if (onSubmit) {
+        onSubmit(thePerson);
+      }
       if (!id) {
         // Reset form if creating a new person
         setForm({ ...defaultForm });
@@ -304,14 +315,27 @@ export default function CreatePersonForm({ id }: { id?: number }) {
       } else {
         setPartnerForms([{ ...defaultPartnerForm }]);
       }
+    } else if (!id) {
+      // Reset form for create
+      setForm({ ...defaultForm });
     }
   }, [id, data, getLoading, getError]);
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-xl mx-auto mt-10 bg-white shadow-xl p-6 rounded-2xl space-y-6"
+      className="max-w-xl mx-auto mt-10 bg-white text-black shadow-xl p-6 rounded-2xl space-y-6 relative max-h-[80vh] overflow-y-auto"
     >
+      {onClose && (
+        <button
+          type="button"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl hover:cursor-pointer"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          &times;
+        </button>
+      )}
       <h2 className="text-2xl font-bold text-gray-800">
         {id ? 'Update Person' : 'Create New Person'}
       </h2>
@@ -535,7 +559,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
             <input
               type="checkbox"
               name="isMarried"
-              checked={partnerForm.isMarried}
+              checked={partnerForm.isMarried ?? false}
               onChange={(e) => handlePartnerChange(index, e)}
               className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
@@ -549,7 +573,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 <input
                   type="date"
                   name="marriageDate"
-                  value={partnerForm.marriageDate}
+                  value={partnerForm.marriageDate ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -560,7 +584,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 </label>
                 <input
                   name="marriagePlace"
-                  value={partnerForm.marriagePlace}
+                  value={partnerForm.marriagePlace ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -575,7 +599,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
             <input
               type="checkbox"
               name="isDivorced"
-              checked={partnerForm.isDivorced}
+              checked={partnerForm.isDivorced ?? false}
               onChange={(e) => handlePartnerChange(index, e)}
               className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
@@ -589,7 +613,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 <input
                   type="date"
                   name="divorcedDate"
-                  value={partnerForm.divorcedDate}
+                  value={partnerForm.divorcedDate ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -600,7 +624,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 </label>
                 <input
                   name="divorcedPlace"
-                  value={partnerForm.divorcedPlace}
+                  value={partnerForm.divorcedPlace ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -615,7 +639,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
             <input
               type="checkbox"
               name="isEngaged"
-              checked={partnerForm.isEngaged}
+              checked={partnerForm.isEngaged ?? false}
               onChange={(e) => handlePartnerChange(index, e)}
               className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
@@ -629,7 +653,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 <input
                   type="date"
                   name="engagementDate"
-                  value={partnerForm.engagementDate}
+                  value={partnerForm.engagementDate ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -640,7 +664,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 </label>
                 <input
                   name="engagementPlace"
-                  value={partnerForm.engagementPlace}
+                  value={partnerForm.engagementPlace ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -655,7 +679,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
             <input
               type="checkbox"
               name="isCohabitated"
-              checked={partnerForm.isCohabitated}
+              checked={partnerForm.isCohabitated ?? false}
               onChange={(e) => handlePartnerChange(index, e)}
               className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
@@ -669,7 +693,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 <input
                   type="date"
                   name="cohabitationDate"
-                  value={partnerForm.cohabitationDate}
+                  value={partnerForm.cohabitationDate ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -680,7 +704,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 </label>
                 <input
                   name="cohabitationPlace"
-                  value={partnerForm.cohabitationPlace}
+                  value={partnerForm.cohabitationPlace ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -695,7 +719,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
             <input
               type="checkbox"
               name="isTogether"
-              checked={partnerForm.isTogether}
+              checked={partnerForm.isTogether ?? false}
               onChange={(e) => handlePartnerChange(index, e)}
               className="w-5 h-5 rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
@@ -709,7 +733,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 <input
                   type="date"
                   name="togetherDate"
-                  value={partnerForm.togetherDate}
+                  value={partnerForm.togetherDate ?? ''}
                   onChange={(e) =>
                     setPartnerForms((prev) =>
                       prev.map((partner, i) =>
@@ -728,7 +752,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
                 </label>
                 <input
                   name="togetherPlace"
-                  value={partnerForm.togetherPlace}
+                  value={partnerForm.togetherPlace ?? ''}
                   onChange={(e) => handlePartnerChange(index, e)}
                   className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"
                 />
@@ -742,7 +766,7 @@ export default function CreatePersonForm({ id }: { id?: number }) {
             </label>
             <textarea
               name="notes"
-              value={partnerForm.notes}
+              value={partnerForm.notes ?? ''}
               onChange={(e) => handlePartnerChange(index, e)}
               rows={3}
               className="w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none p-2"

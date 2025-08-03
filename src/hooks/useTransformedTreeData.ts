@@ -24,7 +24,9 @@ export const useTransformedTreeData = (personId: number) => {
 
   let maxMidX = 0;
 
-  const { data, loading, error } = useQuery(GET_EVERYTHING);
+  const { data, loading, error, refetch } = useQuery(GET_EVERYTHING, {
+    fetchPolicy: 'no-cache',
+  });
 
   const generateTreeItem = (
     personId: number,
@@ -615,9 +617,10 @@ export const useTransformedTreeData = (personId: number) => {
   // useEffect
   useEffect(() => {
     if (!loading && !error) {
+      console.log('Data loaded:', data?.people || []);
       setPeopleData(data?.people || []);
     }
-  }, [personId, loading, error]);
+  }, [personId, loading, error, data]);
 
   useEffect(() => {
     if (peopleData.length > 0) {
@@ -650,5 +653,5 @@ export const useTransformedTreeData = (personId: number) => {
     }
   }, [personDict, personId]);
 
-  return { treeItems, treeLines, loading, error };
+  return { treeItems, treeLines, loading, error, refetch };
 };

@@ -1,13 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTransformedTreeData } from '@/hooks/useTransformedTreeData';
 import { defaultTreeConfig } from '@/constants/person';
 import TreeCard from './TreeCard';
 import { TreeItem, WholeTree } from '@/types/tree';
 import TreeLine from './TreeLine';
+import CreatePersonForm from './CreatePersonForm';
 
 const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
+  const [showCreateTree, setShowCreateTree] = useState(false);
+  const [selectedPersonId, setSelectedPersonId] = useState<number | undefined>(
+    undefined,
+  );
   // hooks
   const transformedTreeData = useTransformedTreeData(id);
 
@@ -47,6 +52,11 @@ const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
           midXPosition={item.midXPosition}
           midYPosition={item.midYPosition}
           person={item.person}
+          onEdit={() => {
+            setSelectedPersonId(item.person.id);
+            setShowCreateTree(true);
+          }}
+          onClick={() => setSelectedPersonId(item.person.id)}
         />
       ))}
       <svg className="group absolute w-full h-full left-0 top-0 pointer-events-none">
@@ -74,6 +84,41 @@ const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
           />
         ))}
       </svg>
+
+      {/* Floating "+" button */}
+      <button
+        type="button"
+        className="fixed bottom-8 right-8 z-50 bg-blue-600 text-white rounded-full w-14 h-14 flex items-center justify-center text-3xl shadow-lg hover:bg-blue-700 hover:cursor-pointer transition"
+        onClick={() => setShowCreateTree(true)}
+        aria-label="Create new tree"
+      >
+        +
+      </button>
+
+      {/* Popup for CreateTree */}
+      {showCreateTree && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto"
+          onClick={() => setShowCreateTree(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+          >
+            <CreatePersonForm
+              id={selectedPersonId}
+              onClose={() => {
+                setShowCreateTree(false);
+                setSelectedPersonId(undefined);
+              }}
+              onSubmit={async () => {
+                setShowCreateTree(false);
+                setSelectedPersonId(undefined);
+                await transformedTreeData.refetch(); // This will re-fetch the tree data
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

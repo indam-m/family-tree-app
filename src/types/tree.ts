@@ -2,6 +2,8 @@ export interface TreeItem {
   midXPosition: number;
   midYPosition: number;
   person: Person;
+  onEdit?: () => void;
+  onClick?: () => void;
 }
 
 export interface WholeTree {
