@@ -13,8 +13,8 @@ export const defaultImage = {
 };
 
 export const defaultTreeConfig = {
-  ITEM_WIDTH: 200,
-  ITEM_HEIGHT: 320,
+  ITEM_WIDTH: 220,
+  ITEM_HEIGHT: 350,
   ITEM_MARGIN_X: 50,
   ITEM_MARGIN_Y: 100,
   ITEM_LINE_WIDTH: 4,

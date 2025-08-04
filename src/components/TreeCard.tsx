@@ -33,14 +33,20 @@ const TreeCard: React.FC<TreeItem> = ({
 
   return (
     <div
-      className={`group absolute justify-center grid shadow-amber-50 shadow-md ${
+      className={`group absolute justify-center grid shadow-2xl shadow-black/60 ${
         person.gender === gender.MALE
           ? 'bg-blue-400'
           : (person.gender === gender.FEMALE && 'bg-pink-400') || 'bg-white'
-      } rounded-2xl w-50 h-80 transition hover:brightness-110 hover:shadow-lg`}
+      } rounded-2xl w-50 h-80 transition hover:brightness-110 hover:shadow-black hover:shadow-3xl`}
       style={{
         left: `${midXPosition - defaultTreeConfig.ITEM_WIDTH / 2}px`,
         top: `${midYPosition - defaultTreeConfig.ITEM_HEIGHT / 2}px`,
+        width: `${defaultTreeConfig.ITEM_WIDTH}px`,
+        height: `${defaultTreeConfig.ITEM_HEIGHT}px`,
+        minWidth: `${defaultTreeConfig.ITEM_WIDTH}px`,
+        minHeight: `${defaultTreeConfig.ITEM_HEIGHT}px`,
+        maxWidth: `${defaultTreeConfig.ITEM_WIDTH}px`,
+        maxHeight: `${defaultTreeConfig.ITEM_HEIGHT}px`,
       }}
     >
       {/* Floating edit button, only visible on hover */}
@@ -52,15 +58,19 @@ const TreeCard: React.FC<TreeItem> = ({
       >
         <PencilSquareIcon className="w-5 h-5" onClick={onEdit} />
       </button>
-      <div className="items-center min-h-50 max-h-50 rounded-t-2xl overflow-hidden">
+      <div className="items-center rounded-t-2xl overflow-hidden">
         <Image
           src={imageUrl}
           alt={`${person.firstName} ${person.lastName} photo`}
-          width={200}
-          height={200}
+          width={defaultTreeConfig.ITEM_WIDTH}
+          height={defaultTreeConfig.ITEM_WIDTH}
+          className="object-cover"
         />
       </div>
-      <div className="p-2 text-black items-center">
+      <div
+        className="p-2 text-black items-center justify-center text-center"
+        style={{ top: defaultTreeConfig.ITEM_WIDTH }}
+      >
         <h3 className="text-md md:text-md font-bold">
           {person.firstName} {person.lastName}
         </h3>

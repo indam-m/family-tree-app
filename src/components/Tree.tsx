@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { HomeIcon } from '@heroicons/react/24/solid';
 import { useTransformedTreeData } from '@/hooks/useTransformedTreeData';
 import { defaultTreeConfig } from '@/constants/person';
 import TreeCard from './TreeCard';
@@ -85,6 +86,15 @@ const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
         ))}
       </svg>
 
+      {/* Floating Home button */}
+      <button
+        type="button"
+        className="fixed bottom-28 right-8 z-50 bg-white text-blue-600 rounded-full w-14 h-14 flex items-center justify-center text-3xl shadow-lg hover:bg-blue-100 hover:text-blue-800 hover:cursor-pointer transition"
+        onClick={() => (window.location.href = '/')} // Change to your home route if needed
+        aria-label="Home"
+      >
+        <HomeIcon className="w-8 h-8" />
+      </button>
       {/* Floating "+" button */}
       <button
         type="button"
