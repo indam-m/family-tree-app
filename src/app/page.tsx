@@ -45,7 +45,7 @@ export default function Home() {
               Go to Your Trees
             </a>
           ) : (
-            <div>
+            <div className="flex flex-col items-center gap-4">
               <a
                 href="/register" // or your login/register page
                 className="inline-block px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg shadow hover:bg-indigo-700 transition"
@@ -54,6 +54,9 @@ export default function Home() {
               </a>
               <a href="/login" className="ml-4 text-indigo-600 hover:underline">
                 Already have an account? Login
+              </a>
+              <a href="/trees" className="ml-4 text-blue-600 hover:underline">
+                View Sample Trees
               </a>
             </div>
           )}

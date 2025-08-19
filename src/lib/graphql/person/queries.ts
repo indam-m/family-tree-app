@@ -97,8 +97,8 @@ export const GET_PERSON_BY_ID = gql`
 `;
 
 export const GET_EVERYTHING = gql`
-  query GetEverything {
-    people {
+  query GetEverything($rootId: Int!) {
+    people(rootId: $rootId) {
       id
       firstName
       lastName

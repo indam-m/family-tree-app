@@ -25,6 +25,7 @@ export const useTransformedTreeData = (personId: number) => {
   let maxMidX = 0;
 
   const { data, loading, error, refetch } = useQuery(GET_EVERYTHING, {
+    variables: { rootId: personId },
     fetchPolicy: 'no-cache',
   });
 
@@ -39,6 +40,9 @@ export const useTransformedTreeData = (personId: number) => {
     partnerIdToExclude: number,
   ) => {
     const person = personDict[personId];
+    if (!person) {
+      console.warn(`Person with ID ${personId} not found in personDict.`);
+    }
     let parentOneId = 0,
       parentTwoId = 0;
     const parentChildRelation =
