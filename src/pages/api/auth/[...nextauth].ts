@@ -23,14 +23,31 @@ export default NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(creds) {
+      async authorize(
+        creds: Record<'email' | 'password', string> | undefined,
+        req: Pick<
+          import('next-auth').RequestInternal,
+          'query' | 'headers' | 'body' | 'method'
+        >,
+      ) {
         if (!creds?.email || !creds?.password) return null;
         const user = await prisma.user.findUnique({
           where: { email: creds.email },
         });
         if (!user?.hashedPassword) return null;
         const ok = await compare(creds.password, user.hashedPassword);
-        return ok ? user : null;
+        if (!ok) return null;
+        // Return only the fields expected by the User type
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          emailVerified: user.emailVerified,
+          role: user.role,
+          // personId must be number | undefined, not null
+          personId: user.personId ?? undefined,
+        } as any;
       },
     }),
   ],
