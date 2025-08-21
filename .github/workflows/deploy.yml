@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: yarn install --immutable --check-cache
-      - run: npx prisma generate
+      - run: npx prisma generate --schema=src/prisma/schema.prisma
       - name: Run migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
