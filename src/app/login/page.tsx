@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const sp = useSearchParams();
-  const callbackUrl = sp.get('callbackUrl') || '/';
+  const callbackUrl = sp?.get('callbackUrl') || '/';
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
