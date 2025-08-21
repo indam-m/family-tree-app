@@ -25,10 +25,12 @@ const Tree: React.FC = (): React.JSX.Element => {
   const [selectedPersonId, setSelectedPersonId] = useState<number | undefined>(
     undefined,
   );
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [id, setId] = useState<number>(
-    (session?.user as typeof session.user & { personId?: number })?.personId ||
-      1, // Default to treeId from session or 0 if not available
+    session?.user
+      ? ((session.user as typeof session.user & { personId?: number })
+          ?.personId ?? 1)
+      : 1, // Default to treeId from session or 1 if not available
   );
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);

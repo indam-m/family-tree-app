@@ -29,8 +29,12 @@ export default function RegisterPage() {
       }
       // auto sign-in after register
       await signIn('credentials', { email, password, callbackUrl: '/' });
-    } catch (e: any) {
-      setErr(e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setErr(e.message);
+      } else {
+        setErr('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }

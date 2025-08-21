@@ -35,10 +35,21 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({
+      account,
+      profile,
+    }: {
+      user: unknown;
+      account: import('next-auth').Account | null;
+      profile?: import('next-auth').Profile;
+    }) {
       // Optional: ensure Google accounts have verified emails
       if (account?.provider === 'google') {
-        const verified = (profile as any)?.email_verified ?? true;
+        // Some providers (like Google) include email_verified in the profile
+        const verified =
+          profile && 'email_verified' in profile
+            ? profile.email_verified
+            : true;
         return !!verified;
       }
       return true;
@@ -63,13 +74,13 @@ export default NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // @ts-ignore
+      // @ts-expect-error: accessToken is not defined on session by default
       session.accessToken = token.accessToken as string | undefined;
-      // @ts-ignore
+      // @ts-expect-error: user.id is not defined on session.user by default
       session.user.id = token.uid;
-      // @ts-ignore
+      // @ts-expect-error: user.role is not defined on session.user by default
       session.user.role = token.role;
-      // @ts-ignore
+      // @ts-expect-error: user.personId is not defined on session.user by default
       session.user.personId = token.personId ?? null;
       // session.accessToken = token.accessToken; // if you enabled it above
       return session;

@@ -12,10 +12,11 @@ const SignOutForm: React.FC<SignOutFormProps> = ({
   onClose,
   onSignOut,
 }) => {
-  if (!isOpen) return null;
-
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(false);
+
+  if (!isOpen) return null;
+
   const handleSignOut = async () => {
     try {
       setLoading(true);
