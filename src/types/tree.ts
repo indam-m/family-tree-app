@@ -6,10 +6,6 @@ export interface TreeItem {
   onClick?: () => void;
 }
 
-export interface WholeTree {
-  id: number;
-}
-
 export interface TreeData {
   treeItems: TreeItem[];
   treeLines: TreeLine[];

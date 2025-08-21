@@ -1,46 +1,70 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HomeIcon } from '@heroicons/react/24/solid';
 import { useTransformedTreeData } from '@/hooks/useTransformedTreeData';
 import { defaultTreeConfig } from '@/constants/person';
 import TreeCard from './TreeCard';
-import { TreeItem, WholeTree } from '@/types/tree';
+import { TreeItem } from '@/types/tree';
 import TreeLine from './TreeLine';
 import CreatePersonForm from './CreatePersonForm';
+import PersonAutoComplete from './PersonAutoComplete';
+import { useSession } from 'next-auth/react';
 
-const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
+// Extend the session user type to include personId
+import type { DefaultUser } from 'next-auth';
+
+declare module 'next-auth' {
+  interface User extends DefaultUser {
+    personId?: number;
+  }
+}
+
+const Tree: React.FC = (): React.JSX.Element => {
   const [showCreateTree, setShowCreateTree] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<number | undefined>(
     undefined,
   );
+  const { data: session, status } = useSession();
+  const [id, setId] = useState<number>(
+    (session?.user as typeof session.user & { personId?: number })?.personId ||
+      1, // Default to treeId from session or 0 if not available
+  );
+  const [width, setWidth] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
+
   // hooks
   const transformedTreeData = useTransformedTreeData(id);
 
-  // Calculate the bounding box of all TreeCards and TreeLines
-  const minX =
-    Math.min(
-      ...transformedTreeData.treeItems.map((item) => item.midXPosition),
-    ) -
-    defaultTreeConfig.ITEM_WIDTH / 2;
-  const maxX =
-    Math.max(
-      ...transformedTreeData.treeItems.map((item) => item.midXPosition),
-    ) +
-    defaultTreeConfig.ITEM_WIDTH / 2;
-  const minY =
-    Math.min(
-      ...transformedTreeData.treeItems.map((item) => item.midYPosition),
-    ) -
-    defaultTreeConfig.ITEM_HEIGHT / 2;
-  const maxY =
-    Math.max(
-      ...transformedTreeData.treeItems.map((item) => item.midYPosition),
-    ) +
-    defaultTreeConfig.ITEM_HEIGHT / 2;
+  useEffect(() => {
+    // Calculate the bounding box of all TreeCards and TreeLines
+    const minX =
+      Math.min(
+        ...transformedTreeData.treeItems.map((item) => item.midXPosition),
+      ) -
+      defaultTreeConfig.ITEM_WIDTH / 2;
+    const maxX =
+      Math.max(
+        ...transformedTreeData.treeItems.map((item) => item.midXPosition),
+      ) +
+      defaultTreeConfig.ITEM_WIDTH / 2;
+    const minY =
+      Math.min(
+        ...transformedTreeData.treeItems.map((item) => item.midYPosition),
+      ) -
+      defaultTreeConfig.ITEM_HEIGHT / 2;
+    const maxY =
+      Math.max(
+        ...transformedTreeData.treeItems.map((item) => item.midYPosition),
+      ) +
+      defaultTreeConfig.ITEM_HEIGHT / 2;
 
-  const width = maxX + minX; // Add padding
-  const height = maxY + minY; // Add padding
+    const _width = maxX + minX; // Add padding
+    const _height = maxY + minY; // Add padding
+    // Set the width and height based on the bounding box of the tree items
+    setWidth(_width);
+    setHeight(_height);
+  }, [transformedTreeData]); // Recalculate when tree data changes
 
   return (
     <div
@@ -85,6 +109,17 @@ const Tree: React.FC<WholeTree> = ({ id }): React.JSX.Element => {
           />
         ))}
       </svg>
+
+      <div className="fixed top-8 left-8 z-50 w-80 bg-white/60 text-black rounded-xl shadow-lg">
+        <PersonAutoComplete
+          selectedPersonId={id}
+          onSelect={(person) => {
+            setId(person.id);
+            // Optionally scroll to or highlight the person in the tree
+          }}
+          placeholder="Search for a person..."
+        />
+      </div>
 
       {/* Floating Home button */}
       <button
