@@ -177,8 +177,9 @@ export const useTransformedTreeData = (personId: number) => {
             maxMidX = Math.max(maxMidX, localMidX);
             const topLine =
               childMidTop -
-              (defaultTreeConfig.ITEM_HEIGHT / 2 +
-                defaultTreeConfig.ITEM_MARGIN_Y / 2);
+              (defaultTreeConfig.ITEM_HEIGHT +
+                defaultTreeConfig.ITEM_MARGIN_Y) /
+                2;
             const midPosition = (mostLeft + mostRight) / 2;
             setTreeLines((prevLines) => [
               ...prevLines,
@@ -217,8 +218,8 @@ export const useTransformedTreeData = (personId: number) => {
             // adjusting left partner position
             const partnerMidXPosition =
               midPosition -
-              (defaultTreeConfig.ITEM_WIDTH / 2 +
-                defaultTreeConfig.ITEM_MARGIN_X);
+              (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
+                2;
             if (partnerItem.treeItem.midXPosition !== partnerMidXPosition) {
               partnerItem.treeItem.midXPosition = partnerMidXPosition;
               setTreeItems((prevItems) =>
@@ -395,14 +396,16 @@ export const useTransformedTreeData = (personId: number) => {
               ? relationship.personTwoId
               : relationship.personOneId;
           let partnerMidXPosition = localMidX;
+          console.log(
+            `Generating right relationship for partner ID ${partnerId} at depth ${depth}`,
+          );
 
           const parentChildren = relationship.parentChildren || [];
 
           if (parentChildren.length > 0) {
             if (parentChildren.length === 1) {
               localMidX +=
-                defaultTreeConfig.ITEM_MARGIN_X +
-                defaultTreeConfig.ITEM_WIDTH / 2;
+                defaultTreeConfig.ITEM_MARGIN_X + defaultTreeConfig.ITEM_WIDTH;
             }
             const {
               mostLeft,
@@ -448,17 +451,18 @@ export const useTransformedTreeData = (personId: number) => {
             ) {
               selfMidXPosition =
                 midPosition -
-                (defaultTreeConfig.ITEM_WIDTH / 2 +
-                  defaultTreeConfig.ITEM_MARGIN_X);
+                (defaultTreeConfig.ITEM_WIDTH +
+                  defaultTreeConfig.ITEM_MARGIN_X) /
+                  2;
             }
             partnerMidXPosition =
               midPosition +
-              (defaultTreeConfig.ITEM_WIDTH / 2 +
-                defaultTreeConfig.ITEM_MARGIN_X);
+              (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
+                2;
           } else {
             partnerMidXPosition +=
-              defaultTreeConfig.ITEM_WIDTH / 2 +
-              defaultTreeConfig.ITEM_MARGIN_X;
+              (defaultTreeConfig.ITEM_WIDTH + defaultTreeConfig.ITEM_MARGIN_X) /
+              2;
           }
 
           const partnerItem = generateTreeItem(
@@ -471,7 +475,13 @@ export const useTransformedTreeData = (personId: number) => {
             false,
             partnerIdToExclude !== 0 ? personId : 0,
           );
-          maxMidX = Math.max(maxMidX, localMidX);
+          maxMidX = Math.max(
+            partnerMidXPosition +
+              defaultTreeConfig.ITEM_WIDTH / 2 +
+              defaultTreeConfig.ITEM_MARGIN_X,
+            localMidX,
+          );
+          localMidX = maxMidX;
           rightPartnerTreeItems.push({
             treeItem: partnerItem.treeItem,
             relationship,
