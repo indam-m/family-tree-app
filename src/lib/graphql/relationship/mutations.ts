@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const UPSERT_RELATIONSHIPS = gql`
-  mutation UpsertRelationships($relationships: [CreateRelationship!]!) {
+  mutation UpsertRelationships($relationships: [CreateRelationshipInput!]!) {
     upsertRelationships(relationships: $relationships) {
       id
       personOneId

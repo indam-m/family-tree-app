@@ -113,7 +113,6 @@ export default function CreatePersonForm({
         parentTwoId: parentTwoId || null,
       };
       let thePerson = {} as Person;
-      console.log('input', input);
       if (!id) {
         const createResult = await createPerson({
           variables: input,
@@ -158,7 +157,6 @@ export default function CreatePersonForm({
             relationships: newRelationshipInputs,
           },
         });
-        console.log('newRelationshipInputs', newRelationshipInputs);
       }
 
       alert(`🎉 Person ${id ? 'updated' : 'created'}!`);

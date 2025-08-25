@@ -20,22 +20,24 @@ export const CREATE_PERSON = gql`
     $updatedBy: String!
   ) {
     createPerson(
-      firstName: $firstName
-      lastName: $lastName
-      gender: $gender
-      birthDate: $birthDate
-      imageUrl: $imageUrl
-      notes: $notes
-      nickName: $nickName
-      birthPlace: $birthPlace
-      isDeceased: $isDeceased
-      deathDate: $deathDate
-      deathPlace: $deathPlace
-      parentOneId: $parentOneId
-      parentTwoId: $parentTwoId
-      isAdopted: $isAdopted
-      createdBy: $createdBy
-      updatedBy: $updatedBy
+      input: {
+        firstName: $firstName
+        lastName: $lastName
+        gender: $gender
+        birthDate: $birthDate
+        imageUrl: $imageUrl
+        notes: $notes
+        nickName: $nickName
+        birthPlace: $birthPlace
+        isDeceased: $isDeceased
+        deathDate: $deathDate
+        deathPlace: $deathPlace
+        parentOneId: $parentOneId
+        parentTwoId: $parentTwoId
+        isAdopted: $isAdopted
+        createdBy: $createdBy
+        updatedBy: $updatedBy
+      }
     ) {
       id
       firstName

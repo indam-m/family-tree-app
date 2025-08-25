@@ -8,7 +8,7 @@ export const gender = {
 
 export const defaultImage = {
   MALE: '/default/male.jpeg',
-  FEMALE: 'default/female.webp',
+  FEMALE: '/default/female.webp',
   OTHER: '/default/male.jpeg',
 };
 
